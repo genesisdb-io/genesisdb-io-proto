@@ -153,24 +153,24 @@ The gRPC server has reflection enabled, so you can use `grpcurl` for debugging.
 
 **List available services:**
 ```bash
-grpcurl -plaintext localhost:9090 list
+grpcurl -plaintext localhost:50051 list
 ```
 
 **Describe a service:**
 ```bash
-grpcurl -plaintext localhost:9090 describe genesisdb.GenesisDBService
+grpcurl -plaintext localhost:50051 describe genesisdb.GenesisDBService
 ```
 
 **Ping (no auth):**
 ```bash
-grpcurl -plaintext localhost:9090 genesisdb.GenesisDBService/Ping
+grpcurl -plaintext localhost:50051 genesisdb.GenesisDBService/Ping
 ```
 
 **Get status:**
 ```bash
 grpcurl -plaintext \
   -H "authorization: your-token" \
-  localhost:9090 genesisdb.GenesisDBService/GetStatus
+  localhost:50051 genesisdb.GenesisDBService/GetStatus
 ```
 
 **Commit an event:**
@@ -188,7 +188,7 @@ grpcurl -plaintext \
       }
     }]
   }' \
-  localhost:9090 genesisdb.GenesisDBService/Commit
+  localhost:50051 genesisdb.GenesisDBService/Commit
 ```
 
 **Stream events:**
@@ -196,7 +196,7 @@ grpcurl -plaintext \
 grpcurl -plaintext \
   -H "authorization: your-token" \
   -d '{"subject": "/users/123"}' \
-  localhost:9090 genesisdb.GenesisDBService/Stream
+  localhost:50051 genesisdb.GenesisDBService/Stream
 ```
 
 **Observe (server streaming):**
@@ -204,7 +204,7 @@ grpcurl -plaintext \
 grpcurl -plaintext \
   -H "authorization: your-token" \
   -d '{"subject": "/users/123", "interval": 1000}' \
-  localhost:9090 genesisdb.GenesisDBService/Observe
+  localhost:50051 genesisdb.GenesisDBService/Observe
 ```
 
 ### Using Go Client
@@ -225,7 +225,7 @@ import (
 
 func main() {
     // Connect to gRPC server
-    conn, err := grpc.Dial("localhost:9090",
+    conn, err := grpc.Dial("localhost:50051",
         grpc.WithTransportCredentials(insecure.NewCredentials()))
     if err != nil {
         log.Fatalf("Failed to connect: %v", err)
@@ -395,10 +395,10 @@ gRPC reflection is enabled by default, which allows tools like `grpcurl` and gRP
 To verify the server is running:
 
 ```bash
-grpcurl -plaintext localhost:9090 list
+grpcurl -plaintext localhost:50051 list
 # Should output: genesisdb.GenesisDBService
 
-grpcurl -plaintext localhost:9090 genesisdb.GenesisDBService/Ping
+grpcurl -plaintext localhost:50051 genesisdb.GenesisDBService/Ping
 # Should output: { "status": "ok" }
 ```
 
