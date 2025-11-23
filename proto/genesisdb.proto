@@ -1,0 +1,255 @@
+syntax = "proto3";
+
+package genesisdb;
+
+option go_package = "genesisdb.io/genesisdb/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// GenesisDBService provides gRPC access to the GenesisDB event store
+service GenesisDBService {
+  // Commit writes events to the event store
+  rpc Commit(CommitRequest) returns (CommitResponse);
+
+  // Stream retrieves events for a subject
+  rpc Stream(StreamRequest) returns (StreamResponse);
+
+  // Observe watches for new events (server-side streaming)
+  rpc Observe(ObserveRequest) returns (stream Event);
+
+  // Query executes a GQL query (Enterprise only)
+  rpc Query(QueryRequest) returns (QueryResponse);
+
+  // GetStatus returns detailed server status
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+
+  // Ping is a simple health check
+  rpc Ping(PingRequest) returns (PingResponse);
+
+  // GetSubjects returns all subjects in the store
+  rpc GetSubjects(GetSubjectsRequest) returns (GetSubjectsResponse);
+
+  // GetTypes returns all event types in the store
+  rpc GetTypes(GetTypesRequest) returns (GetTypesResponse);
+
+  // CreateBackup exports all events
+  rpc CreateBackup(CreateBackupRequest) returns (CreateBackupResponse);
+
+  // RestoreBackup imports events from a backup
+  rpc RestoreBackup(RestoreBackupRequest) returns (RestoreBackupResponse);
+
+  // EraseSubject deletes all events for a subject (Enterprise only)
+  rpc EraseSubject(EraseSubjectRequest) returns (EraseSubjectResponse);
+
+  // RegisterSchema registers a JSON schema for an event type (Enterprise only)
+  rpc RegisterSchema(RegisterSchemaRequest) returns (RegisterSchemaResponse);
+
+  // GetSchemas retrieves registered schemas (Enterprise only)
+  rpc GetSchemas(GetSchemasRequest) returns (GetSchemasResponse);
+
+  // Audit checks the integrity of event chains (Enterprise only)
+  rpc Audit(AuditRequest) returns (AuditResponse);
+}
+
+// Event represents a single event in the system
+message Event {
+  string source = 1;
+  string subject = 2;
+  string type = 3;
+  string specversion = 4;
+  string id = 5;
+  google.protobuf.Timestamp time = 6;
+  string datacontenttype = 7;
+  string predecessorhash = 8;
+  google.protobuf.Struct data = 9;
+  string hash = 10;
+}
+
+// EventInput is used when committing events
+message EventInput {
+  string source = 1;
+  string subject = 2;
+  string type = 3;
+  google.protobuf.Struct data = 4;
+  google.protobuf.Struct ref = 5;
+  EventOptions options = 6;
+}
+
+message EventOptions {
+  bool store_data_as_reference = 1;
+}
+
+// Precondition for conditional commits
+message Precondition {
+  string type = 1;
+  google.protobuf.Struct payload = 2;
+}
+
+// CommitRequest contains events to commit
+message CommitRequest {
+  repeated EventInput events = 1;
+  repeated Precondition preconditions = 2;
+}
+
+// CommitResponse contains the committed events
+message CommitResponse {
+  repeated Event events = 1;
+}
+
+// StreamRequest queries events by subject
+message StreamRequest {
+  string subject = 1;
+  StreamOptions options = 2;
+}
+
+message StreamOptions {
+  string lower_bound = 1;
+  bool include_lower_bound_event = 2;
+  string upper_bound = 3;
+  bool include_upper_bound_event = 4;
+  string latest_by_event_type = 5;
+}
+
+// StreamResponse contains retrieved events
+message StreamResponse {
+  repeated Event events = 1;
+}
+
+// ObserveRequest watches for new events
+message ObserveRequest {
+  string subject = 1;
+  int32 interval = 2;
+  ObserveOptions options = 3;
+}
+
+message ObserveOptions {
+  string lower_bound = 1;
+  bool include_lower_bound_event = 2;
+  string upper_bound = 3;
+  bool include_upper_bound_event = 4;
+}
+
+// QueryRequest contains a GQL query
+message QueryRequest {
+  string query = 1;
+}
+
+// QueryResponse contains query results
+message QueryResponse {
+  google.protobuf.Struct result = 1;
+}
+
+// GetStatusRequest is empty
+message GetStatusRequest {}
+
+// GetStatusResponse contains server status
+message GetStatusResponse {
+  string version = 1;
+  string edition = 2;
+  string release_channel = 3;
+  int64 event_count = 4;
+  int64 subject_count = 5;
+  string store_directory = 6;
+  SystemInfo system = 7;
+}
+
+message SystemInfo {
+  string os = 1;
+  string arch = 2;
+  int32 cpus = 3;
+  double cpu_usage = 4;
+  int64 memory_total = 5;
+  int64 memory_used = 6;
+  int64 memory_free = 7;
+  int64 disk_total = 8;
+  int64 disk_used = 9;
+  int64 disk_free = 10;
+}
+
+// PingRequest is empty
+message PingRequest {}
+
+// PingResponse contains a simple status
+message PingResponse {
+  string status = 1;
+}
+
+// GetSubjectsRequest is empty
+message GetSubjectsRequest {}
+
+// GetSubjectsResponse contains all subjects
+message GetSubjectsResponse {
+  repeated string subjects = 1;
+}
+
+// GetTypesRequest is empty
+message GetTypesRequest {}
+
+// GetTypesResponse contains all event types
+message GetTypesResponse {
+  repeated string types = 1;
+}
+
+// CreateBackupRequest is empty
+message CreateBackupRequest {}
+
+// CreateBackupResponse contains backup data
+message CreateBackupResponse {
+  bytes data = 1;
+}
+
+// RestoreBackupRequest contains backup data to restore
+message RestoreBackupRequest {
+  bytes data = 1;
+}
+
+// RestoreBackupResponse contains restore result
+message RestoreBackupResponse {
+  int32 events_restored = 1;
+}
+
+// EraseSubjectRequest specifies which subject to erase
+message EraseSubjectRequest {
+  string subject = 1;
+}
+
+// EraseSubjectResponse contains erase result
+message EraseSubjectResponse {
+  int32 events_erased = 1;
+}
+
+// RegisterSchemaRequest contains schema to register
+message RegisterSchemaRequest {
+  string event_type = 1;
+  string schema = 2;
+}
+
+// RegisterSchemaResponse contains registration result
+message RegisterSchemaResponse {
+  bool success = 1;
+}
+
+// GetSchemasRequest queries schemas
+message GetSchemasRequest {
+  string event_type = 1;
+}
+
+// GetSchemasResponse contains schemas
+message GetSchemasResponse {
+  map<string, string> schemas = 1;
+}
+
+// AuditRequest is empty
+message AuditRequest {}
+
+// AuditResponse contains audit results
+message AuditResponse {
+  repeated AuditResult results = 1;
+}
+
+message AuditResult {
+  string subject = 1;
+  bool valid = 2;
+  string error = 3;
+}
