@@ -1,10 +1,10 @@
-# Genesis DB gRPC Endpoint
+# GenesisDB gRPC Endpoint
 
-This document explains how to work with the Genesis DB gRPC endpoint.
+This document explains how to work with the GenesisDB gRPC endpoint.
 
 ## Overview
 
-Genesis DB provides a gRPC API alongside its HTTP API. The gRPC server runs on port 50051 by default and provides access to all core event store operations.
+GenesisDB provides a gRPC API alongside its HTTP API. The gRPC server runs on port 50051 by default and provides access to all core event store operations.
 
 ## Configuration
 
@@ -17,7 +17,7 @@ Genesis DB provides a gRPC API alongside its HTTP API. The gRPC server runs on p
 
 ### Enabling gRPC
 
-Set the environment variable before starting Genesis DB:
+Set the environment variable before starting GenesisDB:
 
 ```bash
 export GENESISDB_GRPC_ENABLED=true
